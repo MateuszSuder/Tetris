@@ -1,128 +1,75 @@
-import { Sprite, Ticker } from "pixi.js-legacy";
-import { app, blockSize, drawBlock } from "./index";
+import { Sprite } from "pixi.js-legacy";
+import { app, blockSize } from "./index";
 import { randomInt } from "./functions";
-var Board = /** @class */ (function () {
-    function Board() {
-        var _this = this;
+import { Block } from "./Block";
+export class Board {
+    constructor() {
         this.board = [];
-        this.move = new Ticker();
-        // Add Board and set it's size
-        this.boardS = Sprite.from(app.loader.resources['back'].texture);
-        app.stage.addChild(this.boardS);
-        this.boardS.width = blockSize * 10;
-        this.boardS.height = blockSize * 20;
-        // Draw blocks
-        this.activeBlock = drawBlock(blockSize, randomInt(1, 7));
-        this.nextBlock = drawBlock(blockSize, randomInt(1, 7));
-        // Add blocks to stage
-        app.stage.addChild(this.activeBlock, this.nextBlock);
-        // Set positions of blocks
-        this.setPosition(true);
-        var it = 1;
-        this.move.add(function (delta) {
-            if (it % Math.round(_this.move.FPS / 6) == 0) {
-                console.log(!_this.detectCollision("down"));
-                if (!_this.detectCollision("down")) {
-                    _this.activeBlock.y += blockSize;
-                }
-                else {
-                    _this.stopActive();
-                }
-            }
-            it++;
-        });
-        this.move.start();
-        window.addEventListener('keydown', function (e) {
-            _this.keyListener(e);
+        this.bSprite = Sprite.from(app.loader.resources['back'].texture);
+        this.createBoard();
+        this.activeBlock = new Block(3);
+        this.nextBlock = new Block(randomInt(1, 7));
+        app.stage.addChild(this.activeBlock.res);
+        this.activeBlock.res.x = (this.bSprite.getBounds().left + 3 * blockSize);
+        this.activeBlock.res.y = (this.bSprite.getBounds().top + 4 * blockSize);
+        window.addEventListener('keydown', (e) => {
+            this.handleKey(e);
         });
     }
-    Board.prototype.keyListener = function (e) {
+    handleKey(e) {
         switch (e.key) {
-            case "ArrowLeft":
-                if (!this.detectCollision("left")) {
-                    this.activeBlock.x -= blockSize;
-                }
-                break;
-            case "ArrowRight":
-                if (!this.detectCollision("right")) {
-                    this.activeBlock.x += blockSize;
-                }
-                break;
             case "ArrowUp":
-                this.activeBlock.angle += 90;
+                {
+                    this.activeBlock.changeState(this.activeBlock.res.getBounds().left - this.bSprite.getBounds().left, this.bSprite.getBounds().bottom - this.activeBlock.res.getBounds().bottom, this.board, true);
+                }
                 break;
-            default:
-                return;
+            case "ArrowDown": {
+                if (!this.boardCollision("down")) {
+                    this.activeBlock.res.y += blockSize;
+                }
+                break;
+            }
+            case "ArrowLeft": {
+                if (!this.boardCollision("left")) {
+                    this.activeBlock.res.x -= blockSize;
+                }
+                break;
+            }
+            case "ArrowRight": {
+                if (!this.boardCollision("right")) {
+                    this.activeBlock.res.x += blockSize;
+                }
+                break;
+            }
         }
-    };
-    Board.prototype.stopActive = function () {
-        var _this = this;
-        this.activeBlock.children.forEach(function (element) {
-            _this.board.push(element);
-        });
-        this.activeBlock = this.nextBlock;
-        this.nextBlock = drawBlock(blockSize, randomInt(1, 7));
-        app.stage.addChild(this.nextBlock);
-        this.setPosition(false);
-    };
-    Board.prototype.detectCollision = function (direction) {
-        var _this = this;
-        var result = false;
+    }
+    boardCollision(direction) {
         switch (direction) {
-            case "down":
-                if (this.activeBlock.getBounds().bottom == this.boardS.getBounds().bottom) {
-                    result = true;
+            case "down": {
+                if (this.activeBlock.res.getBounds().bottom == this.bSprite.getBounds().bottom) {
+                    return true;
                 }
-                else {
-                    this.activeBlock.children.forEach(function (el) {
-                        _this.board.forEach(function (b) {
-                            if (el.getBounds().x == b.getBounds().x) {
-                                if (el.getBounds().bottom == b.getBounds().top) {
-                                    result = true;
-                                }
-                            }
-                        });
-                    });
+                break;
+            }
+            case "left": {
+                if (this.activeBlock.res.getBounds().left - blockSize / 2 < this.bSprite.getBounds().left) {
+                    return true;
                 }
-                return result;
-            case "left":
-                if (this.activeBlock.getBounds().left == this.boardS.getBounds().left) {
-                    result = true;
+                break;
+            }
+            case "right": {
+                if (this.activeBlock.res.getBounds().right + blockSize / 2 > this.bSprite.getBounds().right) {
+                    return true;
                 }
-                else {
-                    this.activeBlock.children.forEach(function (el) {
-                        _this.board.forEach(function (b) {
-                            if (el.getBounds().bottom == b.getBounds().top && el.getBounds().left == b.getBounds().right) {
-                                result = true;
-                            }
-                        });
-                    });
-                }
-                return result;
-            case "right":
-                if (this.activeBlock.getBounds().right == this.boardS.getBounds().right) {
-                    result = true;
-                }
-                else {
-                    this.activeBlock.children.forEach(function (el) {
-                        _this.board.forEach(function (b) {
-                            if (el.getBounds().bottom == b.getBounds().top && el.getBounds().right == b.getBounds().left) {
-                                result = true;
-                            }
-                        });
-                    });
-                }
-                return result;
+                break;
+            }
         }
-    };
-    Board.prototype.setPosition = function (board) {
-        if (board) {
-            this.boardS.anchor.set(0.5, 1);
-            this.boardS.position.set(window.innerWidth / 2, window.innerHeight);
-        }
-        this.activeBlock.position.set(this.boardS.getBounds().left + 4 * blockSize, this.boardS.getBounds().top);
-        this.nextBlock.position.set(this.boardS.getBounds().left - 4 * blockSize, this.boardS.getBounds().top);
-    };
-    return Board;
-}());
-export { Board };
+    }
+    createBoard() {
+        this.bSprite.height = 20 * blockSize;
+        this.bSprite.width = 10 * blockSize;
+        this.bSprite.anchor.set(0.5, 1);
+        this.bSprite.position.set(window.innerWidth / 2, window.innerHeight);
+        app.stage.addChild(this.bSprite);
+    }
+}
