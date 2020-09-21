@@ -33,7 +33,7 @@ export class Board {
         let t: number = new Date().getTime();
 
         this.boardTicker.add((delta) => {
-            if(Date.now() - t > 100){
+            if(Date.now() - t > 300){
                 if(!this.boardCollision("down")){
                     this.activeBlock.res.y += blockSize;
                 }else{
@@ -63,6 +63,8 @@ export class Board {
             this.board[r][c] = el;
         })
 
+        this.lineCheck()
+
         this.activeBlock = this.nextBlock;
 
         this.nextBlock = new Block(randomInt(1, 7));
@@ -78,6 +80,31 @@ export class Board {
 
         this.nextBlock.res.y = this.bSprite.getBounds().top;
         this.nextBlock.res.x = this.bSprite.getBounds().left - this.nextBlock.res.width - blockSize;
+    }
+
+    lineCheck(){
+        for(let i = 0; i < this.board.length; i++) {
+            for(let j of this.board[i]){
+                if(j == null){
+                    break;
+                }else{
+                    if(this.board[i].indexOf(j) == 9){
+                        this.board[i].forEach(el => {
+                            el.destroy();
+                        })
+                        this.board[i].splice(0,10);
+                        let k = i;
+                        for(k; k >= 1; k--){
+                            this.board[k] = this.board[k-1];
+                            this.board[k].forEach(kc => {
+                                kc.y += blockSize;
+                            })
+                        }
+                        console.log(this.board)
+                    }
+                }
+            }
+        }
     }
 
     handleKey(e: KeyboardEvent){

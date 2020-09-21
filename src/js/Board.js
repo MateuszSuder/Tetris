@@ -9,8 +9,8 @@ export class Board {
         this.boardTicker = new Ticker;
         this.blocks = new Container();
         this.createBoard();
-        this.activeBlock = new Block(1);
-        this.nextBlock = new Block(1);
+        this.activeBlock = new Block(randomInt(1, 7));
+        this.nextBlock = new Block(randomInt(1, 7));
         this.blocks = this.blocksContainer();
         this.blocks.addChild(this.activeBlock.res, this.nextBlock.res);
         app.stage.addChild(this.blocks);
@@ -23,7 +23,7 @@ export class Board {
         }
         let t = new Date().getTime();
         this.boardTicker.add((delta) => {
-            if (Date.now() - t > 100) {
+            if (Date.now() - t > 300) {
                 if (!this.boardCollision("down")) {
                     this.activeBlock.res.y += blockSize;
                 }
@@ -50,6 +50,7 @@ export class Board {
             let c = Math.round((el.getBounds().left - this.bSprite.getBounds().left) / blockSize);
             this.board[r][c] = el;
         });
+        this.lineCheck();
         this.activeBlock = this.nextBlock;
         this.nextBlock = new Block(randomInt(1, 7));
         this.blocks.addChild(this.nextBlock.res);
@@ -60,6 +61,31 @@ export class Board {
         this.activeBlock.res.y = (this.bSprite.getBounds().top - this.activeBlock.res.height);
         this.nextBlock.res.y = this.bSprite.getBounds().top;
         this.nextBlock.res.x = this.bSprite.getBounds().left - this.nextBlock.res.width - blockSize;
+    }
+    lineCheck() {
+        for (let i = 0; i < this.board.length; i++) {
+            for (let j of this.board[i]) {
+                if (j == null) {
+                    break;
+                }
+                else {
+                    if (this.board[i].indexOf(j) == 9) {
+                        this.board[i].forEach(el => {
+                            el.destroy();
+                        });
+                        this.board[i].splice(0, 10);
+                        let k = i;
+                        for (k; k >= 1; k--) {
+                            this.board[k] = this.board[k - 1];
+                            this.board[k].forEach(kc => {
+                                kc.y += blockSize;
+                            });
+                        }
+                        console.log(this.board);
+                    }
+                }
+            }
+        }
     }
     handleKey(e) {
         switch (e.key) {
