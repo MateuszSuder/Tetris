@@ -1,5 +1,4 @@
-import { Container, Texture, Sprite } from "pixi.js-legacy";
-import { isBreakStatement } from "../../node_modules/typescript/lib/typescript";
+import { Container, Texture, Sprite, DisplayObject, AnimatedSprite } from "pixi.js-legacy";
 import { app, blockSize } from "./index"
 
 
@@ -8,10 +7,14 @@ export class Block {
     tex: Texture;
     res: Container = new Container();
     blockNumber: number;
+    calc: boolean = false;
 
-    constructor(bnr: number){
+    constructor(bnr: number, c?: boolean){
         this.blockNumber = bnr;
-            
+        if(c){
+            this.calc = c;
+        }
+
         this.tex = app.loader.resources['b'+bnr].texture;
         
 
@@ -118,16 +121,32 @@ export class Block {
         }
     }
 
-    check(b: Sprite[]){ // Checks if its even possible to change state
-        let copy = Object.assign({}, this); // Object copy to calculate from
-        
+    check(leftBoarderDistance: number, downDistance: number, board: DisplayObject[][], bS: Sprite, next: boolean){ // Checks if its even possible to change state
+        let res = true;
+        let calc = new Block(this.blockNumber, true); // New block for calculations
+        calc.res.position = this.res.position; 
+        calc.state = this.state;
+        calc.changeState(leftBoarderDistance, downDistance, board, bS, next);
+        calc.res.children.forEach(ch => {
+            let r = Math.round((ch.getBounds().top - bS.getBounds().top) / blockSize);
+            let c = Math.round((ch.getBounds().left - bS.getBounds().left) / blockSize);
+            if(r >= 0 && r <= 18 &&  board[r][c] != null){
+                res = false;
+                return;
+            }
+        })
+        return res;
     }
 
-    // Changes state of block, rotates it
-    changeState(leftBoarderDistance: number, downDistance: number, board: Sprite[], next: boolean){ // Method takes border from left, board array and next boolean parameter (true for next state false for previous)
-        this.check(board)
+    // Changes state of block, rotates it (Moves objects)
+    changeState(leftBoarderDistance: number, downDistance: number, board: DisplayObject[][], bS: Sprite, next: boolean){ // Method takes border from left, board array and next boolean parameter (true for next state false for previous)
         let distanceB = Math.round(downDistance / blockSize); // Distance in blocks to bottom border
         let distance = (Math.round(leftBoarderDistance / blockSize)); // Distance in blocks to left border
+        if(this.calc == false){
+            if(this.check(leftBoarderDistance, downDistance, board, bS, next) == false){
+                return;
+            }
+        }
         switch (this.blockNumber){ // Switch depending on block
             case 1: {
                 switch (this.state) { //Check state
@@ -167,22 +186,8 @@ export class Block {
                 break;
             }
             case 3: {
-                let state: number = this.state;
-                if(next){
-                    if(this.state == 4){
-                        state = 1;
-                    }else{
-                        state++;
-                    }
-                }else{
-                    if(this.state == 1){
-                        state = 4;
-                    }else{
-                        state--;
-                    }
-                }
-                console.log("state: " + state)
-                console.log("distance: " + distance)
+                // Variable holding next/previous state, we don't want to change main variable until we change the state
+                let state = this.stateChanger(next);
                 switch (state) {
                     case 1: {
                         for(let i = 0; i < this.res.children.length; i++){
@@ -244,20 +249,7 @@ export class Block {
             }
             case 4: {
                 // Variable holding next/previous state, we don't want to change main variable until we change the state
-                let state: number = this.state;
-                if(next){
-                    if(this.state == 4){
-                        state = 1;
-                    }else{
-                        state++;
-                    }
-                }else{
-                    if(this.state == 1){
-                        state = 4;
-                    }else{
-                        state--;
-                    }
-                }
+                let state = this.stateChanger(next);
                 switch (state) {
                     case 1: {
                         for(let i = 0; i < this.res.children.length; i++){
@@ -319,7 +311,210 @@ export class Block {
                         break;
                     }
                 }
+                break;
+            }
+            case 5: {
+                // Variable holding next/previous state, we don't want to change main variable until we change the state
+                let state = this.stateChanger(next);
+                switch(state) {
+                    case 1: {
+                        for(let i = 0; i < this.res.children.length; i++){
+                            if(i < 2){
+                                this.res.children[i].y = blockSize;
+                                this.res.children[i].x = blockSize * i;
+                            }else{
+                                this.res.children[i].y = 0;
+                                this.res.children[i].x = blockSize * (i-1);
+                            }
+                        }
+                        this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        this.state = state;
+                        break;
+                    }
+                    case 2: {
+                        for(let i = 0; i < this.res.children.length; i++){
+                            if(i < 2){
+                                this.res.children[i].y = blockSize * i;
+                                this.res.children[i].x = blockSize;
+                            }else{
+                                this.res.children[i].y = blockSize * (i-1);
+                                this.res.children[i].x = blockSize * 2;
+                            }
+                        }
+                        this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
+                        this.state = state;
+                        break;
+                    }
+                    case 3: {
+                        for(let i = 0; i < this.res.children.length; i++){
+                            if(i < 2){
+                                this.res.children[i].y = blockSize * 2;
+                                this.res.children[i].x = blockSize * i;
+                            }else{
+                                this.res.children[i].y = blockSize;
+                                this.res.children[i].x = blockSize * (i-1);
+                            }
+                        }
+                        this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        this.state = state;
+                        break;
+                    }
+                    case 4: {
+                        for(let i = 0; i < this.res.children.length; i++){
+                            if(i < 2){
+                                this.res.children[i].y = blockSize * i;
+                                this.res.children[i].x = 0;
+                            }else{
+                                this.res.children[i].y = blockSize * (i-1);
+                                this.res.children[i].x = blockSize;
+                            }
+                        }
+                        this.state = state;
+                        break;
+                    }
+                }
+                break;
+            }
+            case 6: {
+                // Variable holding next/previous state, we don't want to change main variable until we change the state
+                let state = this.stateChanger(next);
+                switch (state) {
+                    case 1: {
+                        for(let i = 0; i < this.res.children.length; i++){
+                            if(i < 3){
+                                this.res.children[i].y = blockSize;
+                                this.res.children[i].x = blockSize * i;
+                            }else{
+                                this.res.children[i].y = 0;
+                                this.res.children[i].x = blockSize * (i-1);
+                            }
+                        }
+                        this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        this.state = state;
+                        break;
+                    }
+                    case 2: {
+                        for(let i = 0; i < this.res.children.length; i++){
+                            if(i < 3){
+                                this.res.children[i].y = blockSize * i;
+                                this.res.children[i].x = blockSize;
+                            }else{
+                                this.res.children[i].y = blockSize * 2;
+                                this.res.children[i].x = blockSize * 2;
+                            }
+                        }
+                        this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
+                        this.state = state;
+                        break;
+                    }
+                    case 3: {
+                        for(let i = 0; i < this.res.children.length; i++){
+                            if(i < 3){
+                                this.res.children[i].y = blockSize;
+                                this.res.children[i].x = blockSize * i;
+                            }else{
+                                this.res.children[i].y = blockSize * 2;
+                                this.res.children[i].x = 0;
+                            }
+                        }
+                        this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        this.state = state;
+                        break;
+                    }
+                    case 4: {
+                        for(let i = 0; i < this.res.children.length; i++){
+                            if(i < 3){
+                                this.res.children[i].y = blockSize * i;
+                                this.res.children[i].x = blockSize;
+                            }else{
+                                this.res.children[i].y = 0;
+                                this.res.children[i].x = 0;
+                            }
+                        }
+                        this.state = state;
+                        break;
+                    }
+                }
+                break;
+            }
+            case 7: {
+                let state = this.stateChanger(next);
+                switch (state) {
+                    case 1: {
+                        for(let i = 0; i < this.res.children.length; i++){
+                            if(i < 2){
+                                this.res.children[i].y = 0;
+                                this.res.children[i].x = blockSize * i;
+                            }else{
+                                this.res.children[i].y = blockSize;
+                                this.res.children[i].x = blockSize * (i-1);
+                            }
+                        }
+                        this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        this.state = state;
+                        break;
+                    }
+                    case 2: {
+                        for(let i = 0; i < this.res.children.length; i++){
+                            if(i < 2){
+                                this.res.children[i].y = blockSize * (i+1);
+                                this.res.children[i].x = blockSize;
+                            }else{
+                                this.res.children[i].y = blockSize * (i-2);
+                                this.res.children[i].x = blockSize * 2;
+                            }
+                        }
+                        this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
+                        this.state = state;
+                        break;
+                    }
+                    case 3: {
+                        for(let i = 0; i < this.res.children.length; i++){
+                            if(i < 2){
+                                this.res.children[i].y = blockSize;
+                                this.res.children[i].x = blockSize * i;
+                            }else{
+                                this.res.children[i].y = blockSize * 2;
+                                this.res.children[i].x = blockSize * (i-1);
+                            }
+                        }
+                        this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        this.state = state;
+                        break;
+                    }
+                    case 4: {
+                        for(let i = 0; i < this.res.children.length; i++){
+                            if(i < 2){
+                                this.res.children[i].y = blockSize * (i+1);
+                                this.res.children[i].x = 0;
+                            }else{
+                                this.res.children[i].y = blockSize * (i-2);
+                                this.res.children[i].x = blockSize;
+                            }
+                        }
+                        this.state = state;
+                        break;
+                    }
+                }
+                break;
             }
         }
+    }
+    stateChanger(next: boolean): number{
+        let state: number = this.state;
+        if(next){
+            if(this.state == 4){
+                state = 1;
+            }else{
+                state++;
+            }
+        }else{
+            if(this.state == 1){
+                state = 4;
+            }else{
+                state--;
+            }
+        }
+        return state;
     }
 }
