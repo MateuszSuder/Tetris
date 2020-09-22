@@ -8,6 +8,8 @@ export class Board {
         this.bSprite = Sprite.from(app.loader.resources['back'].texture);
         this.boardTicker = new Ticker;
         this.blocks = new Container();
+        this.linesDestroyed = 0;
+        this.playing = true;
         this.createBoard();
         this.activeBlock = new Block(randomInt(1, 7));
         this.nextBlock = new Block(randomInt(1, 7));
@@ -44,11 +46,22 @@ export class Board {
         c.mask = m;
         return c;
     }
+    end() {
+        this.boardTicker.stop();
+        this.playing = false;
+    }
     stopActive() {
         this.activeBlock.res.children.forEach(el => {
-            let r = Math.round((el.getBounds().top - this.bSprite.getBounds().top) / blockSize);
-            let c = Math.round((el.getBounds().left - this.bSprite.getBounds().left) / blockSize);
-            this.board[r][c] = el;
+            let r = 0;
+            let c = 0;
+            r = Math.round((el.getBounds().top - this.bSprite.getBounds().top) / blockSize);
+            c = Math.round((el.getBounds().left - this.bSprite.getBounds().left) / blockSize);
+            if (r <= 0) {
+                this.end();
+            }
+            else {
+                this.board[r][c] = el;
+            }
         });
         this.lineCheck();
         this.activeBlock = this.nextBlock;
@@ -75,42 +88,53 @@ export class Board {
                         });
                         this.board[i].splice(0, 10);
                         let k = i;
-                        for (k; k >= 1; k--) {
-                            this.board[k] = this.board[k - 1];
-                            this.board[k].forEach(kc => {
-                                kc.y += blockSize;
-                            });
+                        for (k; k >= 0; k--) {
+                            if (k == 0) {
+                                this.board[k] = [];
+                            }
+                            else {
+                                this.board[k] = this.board[k - 1];
+                                this.board[k].forEach(kc => {
+                                    kc.y += blockSize;
+                                });
+                            }
                         }
-                        console.log(this.board);
+                        this.linesDestroyed++;
                     }
                 }
             }
         }
     }
     handleKey(e) {
-        switch (e.key) {
-            case "ArrowUp":
-                {
+        if (this.playing) {
+            switch (e.key) {
+                case "ArrowUp":
+                case "z": {
                     this.activeBlock.changeState(this.activeBlock.res.getBounds().left - this.bSprite.getBounds().left, this.bSprite.getBounds().bottom - this.activeBlock.res.getBounds().bottom, this.board, this.bSprite, true);
+                    break;
                 }
-                break;
-            case "ArrowDown": {
-                if (!this.boardCollision("down")) {
-                    this.activeBlock.res.y += blockSize;
+                case "x": {
+                    this.activeBlock.changeState(this.activeBlock.res.getBounds().left - this.bSprite.getBounds().left, this.bSprite.getBounds().bottom - this.activeBlock.res.getBounds().bottom, this.board, this.bSprite, false);
+                    break;
                 }
-                break;
-            }
-            case "ArrowLeft": {
-                if (!this.boardCollision("left")) {
-                    this.activeBlock.res.x -= blockSize;
+                case "ArrowDown": {
+                    if (!this.boardCollision("down")) {
+                        this.activeBlock.res.y += blockSize;
+                    }
+                    break;
                 }
-                break;
-            }
-            case "ArrowRight": {
-                if (!this.boardCollision("right")) {
-                    this.activeBlock.res.x += blockSize;
+                case "ArrowLeft": {
+                    if (!this.boardCollision("left")) {
+                        this.activeBlock.res.x -= blockSize;
+                    }
+                    break;
                 }
-                break;
+                case "ArrowRight": {
+                    if (!this.boardCollision("right")) {
+                        this.activeBlock.res.x += blockSize;
+                    }
+                    break;
+                }
             }
         }
     }
