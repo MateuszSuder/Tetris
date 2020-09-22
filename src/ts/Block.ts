@@ -199,7 +199,11 @@ export class Block {
                                 this.res.children[i].x = blockSize * (i-1);
                             }
                         }
-                        this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        if(next){
+                            this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        }else{
+                            this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -213,7 +217,9 @@ export class Block {
                                 this.res.children[i].x = blockSize;
                             }
                         }
-                        this.res.y -= blockSize * (distanceB == 0 ? 1 : 0); 
+                        if(next){
+                            this.res.y -= blockSize * (distanceB == 0 ? 1 : 0); 
+                        }
                         this.state = state;
                         break;
                     }
@@ -227,7 +233,11 @@ export class Block {
                                 this.res.children[i].x = blockSize * 2;
                             }
                         }
-                        this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        if(next){
+                            this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        }else{
+                            this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -240,6 +250,9 @@ export class Block {
                                 this.res.children[i].y = blockSize * (i-2);
                                 this.res.children[i].x = blockSize;
                             }
+                        }
+                        if(!next){
+                            this.res.y -= blockSize * (distanceB == 0 ? 1 : 0); 
                         }
                         this.state = state;
                         break;
@@ -262,7 +275,11 @@ export class Block {
                                 this.res.children[i].x = blockSize;
                             }
                         }
-                        this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        if(next){
+                            this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        }else{
+                            this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -276,7 +293,11 @@ export class Block {
                                 this.res.children[i].x = (i-1) * blockSize;
                             }
                         }
-                        this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        if(next){
+                            this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        }else{
+                            this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -290,8 +311,11 @@ export class Block {
                                 this.res.children[i].x = blockSize;
                             }
                         }
-                        this.res.x += blockSize * (distance == 8 ? -1 : 0);
-                        this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
+                        
+                        if(next){
+                            this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
+                            this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -304,9 +328,12 @@ export class Block {
                                 this.res.children[i].y = 2 * blockSize;
                                 this.res.children[i].x = blockSize;
                             }
-
                         }
-                        this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        if(next){
+                            this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        }else{
+                            this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -327,7 +354,11 @@ export class Block {
                                 this.res.children[i].x = blockSize * (i-1);
                             }
                         }
-                        this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        if(next){
+                            this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        }else{
+                            this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -341,7 +372,10 @@ export class Block {
                                 this.res.children[i].x = blockSize * 2;
                             }
                         }
-                        this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
+                        if(next){
+                            this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
+                        }
+                        
                         this.state = state;
                         break;
                     }
@@ -355,7 +389,11 @@ export class Block {
                                 this.res.children[i].x = blockSize * (i-1);
                             }
                         }
-                        this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        if(next){
+                            this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        }else{
+                            this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -368,6 +406,9 @@ export class Block {
                                 this.res.children[i].y = blockSize * (i-1);
                                 this.res.children[i].x = blockSize;
                             }
+                        }
+                        if(!next){
+                            this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
                         }
                         this.state = state;
                         break;
@@ -389,7 +430,11 @@ export class Block {
                                 this.res.children[i].x = blockSize * (i-1);
                             }
                         }
-                        this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        if(next){
+                            this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        }else{
+                            this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -403,7 +448,9 @@ export class Block {
                                 this.res.children[i].x = blockSize * 2;
                             }
                         }
-                        this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
+                        if(next){
+                            this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -417,7 +464,11 @@ export class Block {
                                 this.res.children[i].x = 0;
                             }
                         }
-                        this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        if(next){
+                            this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        }else{
+                            this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -430,6 +481,9 @@ export class Block {
                                 this.res.children[i].y = 0;
                                 this.res.children[i].x = 0;
                             }
+                        }
+                        if(!next){
+                            this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
                         }
                         this.state = state;
                         break;
@@ -450,7 +504,11 @@ export class Block {
                                 this.res.children[i].x = blockSize * (i-1);
                             }
                         }
-                        this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        if(next){
+                            this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        }else{
+                            this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -464,7 +522,9 @@ export class Block {
                                 this.res.children[i].x = blockSize * 2;
                             }
                         }
-                        this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
+                        if(next){
+                            this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -478,7 +538,11 @@ export class Block {
                                 this.res.children[i].x = blockSize * (i-1);
                             }
                         }
-                        this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        if(next){
+                            this.res.x += blockSize * (distance == 0 ? 1 : 0);
+                        }else{
+                            this.res.x += blockSize * (distance == 8 ? -1 : 0);
+                        }
                         this.state = state;
                         break;
                     }
@@ -491,6 +555,9 @@ export class Block {
                                 this.res.children[i].y = blockSize * (i-2);
                                 this.res.children[i].x = blockSize;
                             }
+                        }
+                        if(!next){
+                            this.res.y -= blockSize * (distanceB == 0 ? 1 : 0);
                         }
                         this.state = state;
                         break;
