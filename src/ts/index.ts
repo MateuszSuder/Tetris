@@ -1,4 +1,4 @@
-import {Application, Container, Sprite, Filter, filters} from 'pixi.js-legacy'
+import {Application, Container, Sprite, Filter, filters, Graphics} from 'pixi.js-legacy'
 import {Board} from './Board'
 
 export const app = new Application({
