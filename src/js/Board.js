@@ -1,4 +1,4 @@
-import { Sprite, Container, Ticker, Graphics } from "pixi.js-legacy";
+import { Sprite, Container, Ticker, Graphics, Text } from "pixi.js-legacy";
 import { app, blockSize } from "./index";
 import { randomInt } from "./functions";
 import { Block } from "./Block";
@@ -10,7 +10,12 @@ export class Board {
         this.blocks = new Container();
         this.linesDestroyed = 0;
         this.playing = true;
+        this.level = 3;
+        this.spdLevels = [1000, 950, 900, 800, 700, 600, 500, 350, 200, 100, 80, 50];
+        this.textNodes = [];
         this.createBoard();
+        this.levelCheck();
+        this.handleText();
         this.activeBlock = new Block(randomInt(1, 7));
         this.nextBlock = new Block(randomInt(1, 7));
         this.blocks = this.blocksContainer();
@@ -25,7 +30,7 @@ export class Board {
         }
         let t = new Date().getTime();
         this.boardTicker.add((delta) => {
-            if (Date.now() - t > 300) {
+            if (Date.now() - t > this.spdLevels[this.level]) {
                 if (!this.boardCollision("down")) {
                     this.activeBlock.res.y += blockSize;
                 }
@@ -45,6 +50,11 @@ export class Board {
         m.endFill();
         c.mask = m;
         return c;
+    }
+    levelCheck() {
+        if (this.linesDestroyed > 0 && this.level < 12 && this.linesDestroyed % 10 == 0) {
+            this.level++;
+        }
     }
     end() {
         this.boardTicker.stop();
@@ -68,12 +78,14 @@ export class Board {
         this.nextBlock = new Block(randomInt(1, 7));
         this.blocks.addChild(this.nextBlock.res);
         this.positionBlocks();
+        this.levelCheck();
+        this.handleText();
     }
     positionBlocks() {
         this.activeBlock.res.x = (this.bSprite.getBounds().left + 6 * blockSize - this.activeBlock.res.width);
         this.activeBlock.res.y = (this.bSprite.getBounds().top - this.activeBlock.res.height);
-        this.nextBlock.res.y = this.bSprite.getBounds().top;
-        this.nextBlock.res.x = this.bSprite.getBounds().left - this.nextBlock.res.width - blockSize;
+        this.nextBlock.res.y = this.bSprite.getBounds().top + (6 * blockSize - this.nextBlock.res.height) / 2;
+        this.nextBlock.res.x = this.bSprite.getBounds().left - (6 * blockSize + this.nextBlock.res.width) / 2;
     }
     lineCheck() {
         for (let i = 0; i < this.board.length; i++) {
@@ -199,5 +211,42 @@ export class Board {
         this.bSprite.anchor.set(0.5, 1);
         this.bSprite.position.set(window.innerWidth / 2, window.innerHeight);
         app.stage.addChild(this.bSprite);
+        let next = new Graphics();
+        next.beginFill(0x242424);
+        next.drawRect(this.bSprite.getBounds().left - 6 * blockSize, this.bSprite.getBounds().top, 6 * blockSize, 6 * blockSize);
+        next.endFill();
+        app.stage.addChild(next);
+        let lvlLabel = new Text('Level ', {
+            fontFamily: 'Lucida Console',
+            fontSize: blockSize,
+            align: 'left'
+        });
+        lvlLabel.position.set(this.bSprite.getBounds().right, this.bSprite.getBounds().top);
+        app.stage.addChild(lvlLabel);
+        let lvl = new Text('1', {
+            fontFamily: 'Lucida Console',
+            fontSize: blockSize,
+        });
+        lvl.position.set(this.bSprite.getBounds().right, this.bSprite.getBounds().top + blockSize * 3 / 2);
+        app.stage.addChild(lvl);
+        this.textNodes[0] = lvl;
+        let linesLabel = new Text('Lines cleared ', {
+            fontFamily: 'Lucida Console',
+            fontSize: blockSize,
+            align: 'left'
+        });
+        linesLabel.position.set(this.bSprite.getBounds().right, this.bSprite.getBounds().top + 3 * blockSize);
+        app.stage.addChild(linesLabel);
+        let lines = new Text('0', {
+            fontFamily: 'Lucida Console',
+            fontSize: blockSize,
+        });
+        this.textNodes[1] = lines;
+        lines.position.set(this.bSprite.getBounds().right, this.bSprite.getBounds().top + blockSize * 9 / 2);
+        app.stage.addChild(lines);
+    }
+    handleText() {
+        this.textNodes[0].text = (this.level).toString();
+        this.textNodes[1].text = (this.linesDestroyed).toString();
     }
 }
