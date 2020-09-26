@@ -1,5 +1,5 @@
 import { Sprite, Container, Ticker, DisplayObject, Graphics, Text } from "pixi.js-legacy";
-import {app, blockSize} from "./index"
+import {app, blockSize, start} from "./index"
 import {randomInt} from "./functions"
 import {Block} from "./Block"
 
@@ -12,10 +12,13 @@ export class Board {
     blocks = new Container();
     linesDestroyed = 0;
     playing: boolean = true;
-    level: number = 3;
-    spdLevels: number[] = [1000, 950, 900, 800, 700, 600, 500, 350, 200, 100, 80, 50];
-    textNodes: Text[] = []
-    constructor(){
+    level: number = 1;
+    spdLevels: number[] = [1000, 950, 900, 850, 800, 750, 700, 650, 610, 570, 530, 490, 450, 410, 380, 350, 320, 290, 260, 230, 200, 180, 160,
+                        140, 120, 100, 90, 80, 70, 60, 50, 45, 40, 35, 30];
+    textNodes: Text[] = [];
+    score: number = 0;
+    constructor(lvl: number){
+        this.level = lvl;
         this.createBoard();
         this.levelCheck();
         this.handleText();
@@ -53,6 +56,14 @@ export class Board {
         this.boardTicker.start();
     }
 
+    clearBoard(){
+        app.stage.children.forEach(el => {
+            if(app.stage.children.indexOf(el) != 0){
+                el.destroy();
+            }
+        })
+    }
+
     blocksContainer(): Container{
         let c = new Container();
         const m = new Graphics();
@@ -64,14 +75,15 @@ export class Board {
     }
 
     levelCheck(){
-        if(this.linesDestroyed > 0 && this.level < 12 && this.linesDestroyed % 10 == 0){
-            this.level++;
+        if(this.linesDestroyed > 0 && this.level < this.spdLevels.length && Math.floor(this.linesDestroyed / 10) != this.level){
+            this.level = Math.floor(this.linesDestroyed / 10);
         }
     }
 
     end(){
         this.boardTicker.stop();
         this.playing = false;
+        start();
     }
 
     stopActive(){

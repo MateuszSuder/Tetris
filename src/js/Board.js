@@ -1,18 +1,21 @@
 import { Sprite, Container, Ticker, Graphics, Text } from "pixi.js-legacy";
-import { app, blockSize } from "./index";
+import { app, blockSize, start } from "./index";
 import { randomInt } from "./functions";
 import { Block } from "./Block";
 export class Board {
-    constructor() {
+    constructor(lvl) {
         this.board = []; // Row 0-19 (top-bottom), column 0-9 (left-right)
         this.bSprite = Sprite.from(app.loader.resources['back'].texture);
         this.boardTicker = new Ticker;
         this.blocks = new Container();
         this.linesDestroyed = 0;
         this.playing = true;
-        this.level = 3;
-        this.spdLevels = [1000, 950, 900, 800, 700, 600, 500, 350, 200, 100, 80, 50];
+        this.level = 1;
+        this.spdLevels = [1000, 950, 900, 850, 800, 750, 700, 650, 610, 570, 530, 490, 450, 410, 380, 350, 320, 290, 260, 230, 200, 180, 160,
+            140, 120, 100, 90, 80, 70, 60, 50, 45, 40, 35, 30];
         this.textNodes = [];
+        this.score = 0;
+        this.level = lvl;
         this.createBoard();
         this.levelCheck();
         this.handleText();
@@ -42,6 +45,13 @@ export class Board {
         });
         this.boardTicker.start();
     }
+    clearBoard() {
+        app.stage.children.forEach(el => {
+            if (app.stage.children.indexOf(el) != 0) {
+                el.destroy();
+            }
+        });
+    }
     blocksContainer() {
         let c = new Container();
         const m = new Graphics();
@@ -52,13 +62,14 @@ export class Board {
         return c;
     }
     levelCheck() {
-        if (this.linesDestroyed > 0 && this.level < 12 && this.linesDestroyed % 10 == 0) {
-            this.level++;
+        if (this.linesDestroyed > 0 && this.level < this.spdLevels.length && Math.floor(this.linesDestroyed / 10) != this.level) {
+            this.level = Math.floor(this.linesDestroyed / 10);
         }
     }
     end() {
         this.boardTicker.stop();
         this.playing = false;
+        start();
     }
     stopActive() {
         this.activeBlock.res.children.forEach(el => {
