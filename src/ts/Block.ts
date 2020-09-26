@@ -1,4 +1,4 @@
-import { Container, Texture, Sprite, DisplayObject, AnimatedSprite } from "pixi.js-legacy";
+import { Container, Texture, Sprite, DisplayObject } from "pixi.js-legacy";
 import { app, blockSize } from "./index"
 
 
