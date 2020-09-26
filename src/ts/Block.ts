@@ -16,11 +16,9 @@ export class Block {
         }
 
         this.tex = app.loader.resources['b'+bnr].texture;
-        
 
         this.createBlock();
     }
-
 
     // Creates block from texture
     createBlock(){
