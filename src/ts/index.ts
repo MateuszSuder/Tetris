@@ -1,4 +1,5 @@
 import {Application, Sprite, filters} from 'pixi.js-legacy'
+import { isForInStatement, isUnparsedSource } from '../../node_modules/typescript/lib/typescript';
 import {Board} from './Board'
 
 export const app = new Application({
@@ -49,7 +50,161 @@ export function start(){
             play();
         })
     }
-    document.getElementById("options")!.style.display = "flex";
+    manageLeaderboard();
+    document.getElementById("options")!.style.display = "grid";
+}
+
+export function sendScore(){
+    let n = (<HTMLInputElement>document.getElementById("name")!).value;
+    let lv = board.level;
+    let l = board.linesDestroyed;
+    let s = board.score;
+    const result = {
+        name: n,
+        level: lv,
+        lines: l,
+        score: s
+    }
+    window.localStorage.setItem(window.localStorage.length.toString(), JSON.stringify(result))
+}
+
+function manageLeaderboard(){
+    let body = document.getElementById("body");
+    let scores = [];
+    for(let i = 0; i < window.localStorage.length; i++){
+        let item = localStorage.getItem(i.toString())
+        let parsed = item !== null ? JSON.parse(item) : '';
+        scores.push(parsed);
+    }
+    let sortable = [];
+    for(let it of scores){
+        sortable.push([scores.indexOf(it), it.score, it.level, it.lines])
+    }
+    sortable.sort(function(a,b){
+        if(a[1] == b[1]){
+            if(b[2] == a[2]){
+                return b[3] - b[3]
+            }else{
+                return b[2] - a[2];
+            }
+        }else{
+            return b[1] - a[1];
+        }
+    })
+
+    for(let i = 0; i < sortable.length; i++){
+        if(i == 10){
+            break;
+        }
+        let node = document.createElement('div');
+
+        let nr = document.createElement('div');
+        nr.innerText = i.toString();
+        nr.classList.add('cell');
+
+        let name = document.createElement('div');
+        name.innerText = scores[sortable[i][0]].name;
+        name.classList.add('cell');
+
+        let level = document.createElement('div');
+        level.innerText = scores[sortable[i][0]].level;
+        level.classList.add('cell');
+
+        let lines = document.createElement('div');
+        lines.innerText = scores[sortable[i][0]].lines;
+        lines.classList.add('cell');
+
+        let score = document.createElement('div');
+        score.innerText = scores[sortable[i][0]].score;
+        score.classList.add('cell');
+
+        node.appendChild(nr)
+        node.appendChild(name)
+        node.appendChild(level)
+        node.appendChild(lines)
+        node.appendChild(score)
+        
+        body?.appendChild(node)
+    }
+}  
+
+export function pause(){
+    let pause = document.createElement('div');
+    pause.id = 'pause';
+    let pauseInner = document.createElement('div');
+    pauseInner.classList.add('inner');
+
+    let textNode = document.createElement('p')
+    let text = document.createTextNode('Pause');
+    textNode.appendChild(text);
+
+    let resNode = document.createElement('p')
+    let res = document.createTextNode('Resume');
+    resNode.appendChild(res);
+    resNode.addEventListener('click', () => {
+        board.pause();
+    })
+
+    let ngNode = document.createElement('p')
+    let ng = document.createTextNode('New game');
+    ngNode.appendChild(ng);
+    ngNode.addEventListener('click', () => {
+        unpause();
+        start();
+    }) 
+
+    pauseInner.appendChild(textNode);
+    pauseInner.appendChild(resNode);
+    pauseInner.appendChild(ngNode);
+
+    pause.appendChild(pauseInner)
+
+    document.body.appendChild(pause)
+}
+
+export function unpause(){
+    document.getElementById('pause')?.remove();
+}
+
+export function endScreen(){
+    if(document.querySelector("#end") == null){
+        let end = document.createElement('div');
+        end.id = 'end';
+
+        let inner = document.createElement('div');
+        inner.classList.add('inner');
+
+        let goNode = document.createElement('p');
+        let go = document.createTextNode('Game over');
+        goNode.appendChild(go);
+
+        let nameNode = document.createElement('div');
+        nameNode.classList.add('flexCol')
+        let name = document.createTextNode('Your name:');
+        let nameInput = document.createElement('input');
+        nameInput.type = "text";
+        nameInput.id = "name";
+        nameInput.maxLength = 8;
+
+        let submit = document.createElement('div');
+        submit.classList.add('confirm');
+        submit.id = "submit";
+        submit.textContent = "Save score!"
+
+        nameNode.appendChild(name);
+        nameNode.appendChild(nameInput);
+        nameNode.appendChild(submit);
+
+        end.appendChild(inner);
+        inner.appendChild(goNode);
+        inner.appendChild(nameNode);
+
+        document.body.appendChild(end)
+
+        document.querySelector('#submit')?.addEventListener('click', () => {
+            sendScore();
+        })
+    }
 }
 
 function play(){
@@ -79,7 +234,6 @@ function adjustLevel(plus: boolean){
         node!.innerText = (lvl > 1 ? --lvl : lvl).toString();
     }
 }
-
 function loadingDone(){
     document.getElementById("start")!.style.display = "block";
 
@@ -90,16 +244,15 @@ function loadingDone(){
     blockSize = window.innerHeight / 25;
 
     let bg = Sprite.from(app.loader.resources['bg'].texture);
+    app.stage.addChild(bg);
     resizeBackground(bg);
     const blur = new filters.BlurFilter()
     blur.blur = 5;
     bg.filters = [blur];
 
-    app.stage.addChild(bg);
-
-    //new Board();
 
     window.onresize = () => {
+        console.log('rs')
         resizeBackground(bg);
     }
 }
@@ -107,8 +260,10 @@ function loadingDone(){
 
 
 function resizeBackground(bg: Sprite){
-    let scale: number = bg.width / bg.height;
+    let scale: number = app.loader.resources['bg'].texture.width / app.loader.resources['bg'].texture.height;
 
+    app.renderer.view.style.width = window.innerWidth + 'px';
+    app.renderer.view.style.height = window.innerHeight + 'px';
 
     bg.height = window.innerHeight;
     bg.width = window.innerHeight * scale;
