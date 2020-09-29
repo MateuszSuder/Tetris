@@ -25,7 +25,15 @@ app.loader.load();
 export let blockSize;
 export let board;
 function showProgress(e) {
-    document.getElementById("loading-bar-inner").style.width = (Math.round(e.progress) / 100 * 20) + 'vw';
+    document.getElementById("loading-bar-inner").style.width = (Math.round(e.progress)) + '%';
+}
+export function setSize() {
+    if (window.innerWidth > window.innerHeight) {
+        blockSize = window.innerHeight / 25;
+    }
+    else {
+        blockSize = window.innerHeight / 35;
+    }
 }
 export function start() {
     var _a, _b, _c;
@@ -59,6 +67,7 @@ export function sendScore() {
 }
 function manageLeaderboard() {
     let body = document.getElementById("body");
+    body.innerHTML = '';
     let scores = [];
     for (let i = 0; i < window.localStorage.length; i++) {
         let item = localStorage.getItem(i.toString());
@@ -88,7 +97,7 @@ function manageLeaderboard() {
         }
         let node = document.createElement('div');
         let nr = document.createElement('div');
-        nr.innerText = i.toString();
+        nr.innerText = (i + 1).toString();
         nr.classList.add('cell');
         let name = document.createElement('div');
         name.innerText = scores[sortable[i][0]].name;
@@ -171,6 +180,8 @@ export function endScreen() {
         document.body.appendChild(end);
         (_a = document.querySelector('#submit')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
             sendScore();
+            end.remove();
+            start();
         });
     }
 }
@@ -203,11 +214,11 @@ function adjustLevel(plus) {
 }
 function loadingDone() {
     var _a;
+    setSize();
     document.getElementById("start").style.display = "block";
     (_a = document.querySelector("#start")) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
         start();
     });
-    blockSize = window.innerHeight / 25;
     let bg = Sprite.from(app.loader.resources['bg'].texture);
     app.stage.addChild(bg);
     resizeBackground(bg);
