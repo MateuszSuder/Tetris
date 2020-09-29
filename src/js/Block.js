@@ -119,17 +119,20 @@ export class Block {
     check(leftBoarderDistance, downDistance, board, bS, next) {
         let res = true;
         let calc = new Block(this.blockNumber, true); // New block for calculations
-        calc.res.position = this.res.position;
-        calc.state = this.state;
-        calc.changeState(leftBoarderDistance, downDistance, board, bS, next);
-        calc.res.children.forEach(ch => {
-            let r = Math.round((ch.getBounds().top - bS.getBounds().top) / blockSize);
-            let c = Math.round((ch.getBounds().left - bS.getBounds().left) / blockSize);
-            if (r >= 0 && r <= 18 && board[r][c] != null) {
-                res = false;
-                return;
-            }
-        });
+        if (calc instanceof Block) {
+            calc.res.position = this.res.position;
+            calc.state = this.state;
+            calc.changeState(leftBoarderDistance, downDistance, board, bS, next);
+            calc.res.children.forEach(ch => {
+                let r = Math.round((ch.getBounds().top - bS.getBounds().top) / blockSize);
+                let c = Math.round((ch.getBounds().left - bS.getBounds().left) / blockSize);
+                if (r >= 0 && r <= 18 && board[r][c] != null) {
+                    res = false;
+                    return;
+                }
+            });
+        }
+        calc = {};
         return res;
     }
     // Changes state of block, rotates it (Moves objects)
