@@ -63,7 +63,12 @@ export class Board {
         app.stage.addChild(next);
         let stats = new Graphics();
         stats.beginFill(0x242424);
-        stats.drawRoundedRect(this.bSprite.getBounds().right + 1 / 3 * blockSize, this.bSprite.getBounds().top, 10 * blockSize, 11 / 2 * blockSize, blockSize / 3);
+        if (window.innerWidth > window.innerHeight) {
+            stats.drawRoundedRect(this.bSprite.getBounds().right + 1 / 3 * blockSize, this.bSprite.getBounds().top, 10 * blockSize, 11 / 2 * blockSize, blockSize / 3);
+        }
+        else {
+            stats.drawRoundedRect(window.innerWidth / 2 - 5 * blockSize, 0, 10 * blockSize, 11 / 2 * blockSize, blockSize / 3);
+        }
         stats.endFill();
         app.stage.addChild(stats);
         let midx = stats.getBounds().x + stats.getBounds().width / 2;
@@ -73,7 +78,12 @@ export class Board {
             fill: [0xFFFFFF, 0xA0A0A0]
         });
         lvlLabel.anchor.set(0.5, 0);
-        lvlLabel.position.set(midx, this.bSprite.getBounds().top + blockSize / 3);
+        if (window.innerWidth > window.innerHeight) {
+            lvlLabel.position.set(midx, this.bSprite.getBounds().top + blockSize / 3);
+        }
+        else {
+            lvlLabel.position.set(midx, stats.getBounds().top + blockSize / 3);
+        }
         app.stage.addChild(lvlLabel);
         let lvl = new Text('1', {
             fontFamily: 'Lucida Console',

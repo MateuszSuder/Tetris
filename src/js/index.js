@@ -32,7 +32,7 @@ export function setSize() {
         blockSize = window.innerHeight / 25;
     }
     else {
-        blockSize = window.innerHeight / 35;
+        blockSize = window.innerHeight / 40;
     }
 }
 export function start() {

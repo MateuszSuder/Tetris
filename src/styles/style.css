@@ -36,8 +36,19 @@ iframe {
 
 #loading-bar-outer{
     height: 1vh;
-    width: 20vw;
     border-radius: 1vh;
+}
+
+@media (orientation: landscape){
+    #loading-bar-outer {
+        width: 20vw;
+    }
+}
+
+@media (orientation: portrait){
+    #loading-bar-outer {
+        width: 60vw;
+    }
 }
 
 #loading-bar-inner{
@@ -60,11 +71,24 @@ iframe {
     font:          normal bold 1.5vh "Open Sans", sans-serif;
     text-align:    center;
     height: 2.5vh;
-    width: 8vw;
     display: none;
     cursor: pointer;
     outline: none;
 }
+
+@media (orientation: landscape){
+    #start {
+        width: 8vw;
+    }
+}
+
+@media (orientation: portrait){
+    #start {
+        width: 20vw;
+    }
+}
+
+
 
 #options {
     display: none;
@@ -78,9 +102,23 @@ iframe {
     align-items: center;
     color: black;
     font-family: "Lucida Console", Courier, monospace;
-    grid-template-columns: 40% 20% 40%;
-    grid-template-areas: 
-    ". center right";
+}
+
+@media (orientation: landscape){
+    #options {
+        grid-template-columns: 40% 20% 40%;
+        grid-template-areas: 
+        ". options ldb";
+    }
+}
+@media (orientation: portrait){
+    #options {
+        grid-template-rows: 20% 10% 65%;
+        grid-template-areas: 
+        "options"
+        "."
+        "ldb";
+    }
 }
 
 #options-inner{
@@ -93,7 +131,7 @@ iframe {
     border-style: solid;
     border-width: 2px;
     padding: 1vw;
-    grid-area: center;
+    grid-area: options;
 }
 
 #lvl{
@@ -105,13 +143,20 @@ iframe {
     align-items: center;
 }
 
+@media (orientation: portrait){
+    #lvl {
+        width: 40vw;
+    }
+}
+
 #lvl > .bttn {
     background: rgba(0, 0, 0, 0);
     border: 0;
     font-size: 5vh;
     cursor: pointer;
-    
 }
+
+
 #lvl > button:active {
     border-style: none;
 }
@@ -136,6 +181,12 @@ iframe {
     align-items: center;
     margin-top: 2vh;
     cursor: pointer;
+}
+
+@media (orientation: portrait){
+    .confirm {
+        width: 20vw;
+    }
 }
 
 #pause, #end{
@@ -208,13 +259,25 @@ iframe {
     display: grid;
     grid-template-rows: 5% 95%;
     justify-self: center;
-    height: 90vh;
-    width: 90%;
-    grid-area: right;
+    grid-area: ldb;
     background: rgba(255, 255, 255, 0.8);
     border-radius: 1vw;
     text-align: center;
     padding: 0.5vw;
+}
+
+@media (orientation: landscape) {
+    #highscores {    
+        height: 90vh;
+        width: 90%;
+    }
+}
+
+@media (orientation: portrait) {
+    #highscores {
+        width: 90vw;
+        height: 100%;
+    }
 }
 
 #head {

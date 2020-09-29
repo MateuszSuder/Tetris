@@ -40,7 +40,7 @@ export function setSize(){
     if(window.innerWidth > window.innerHeight){
         blockSize = window.innerHeight / 25;
     }else{
-        blockSize = window.innerHeight / 35;
+        blockSize = window.innerHeight / 40;
     }
 }
 
