@@ -1,5 +1,5 @@
 import { Sprite, Container, Ticker, DisplayObject, Graphics, Text } from "pixi.js-legacy";
-import {app, blockSize, start} from "./index"
+import {app, blockSize, start, pause, unpause, endScreen} from "./index"
 import {randomInt} from "./functions"
 import {Block} from "./Block"
 
@@ -19,6 +19,7 @@ export class Board {
     textNodes: Text[] = [];
     score: number = 0;
     tetrisLast: boolean = false; // To check for back-to-back tetris
+    paused: boolean = true;
 
     constructor(lvl: number){
         this.level = lvl;
@@ -47,7 +48,7 @@ export class Board {
         let t: number = new Date().getTime();
 
         this.boardTicker.add((delta) => {
-            if(Date.now() - t > this.spdLevels[this.level]){
+            if(Date.now() - t > this.spdLevels[this.level-1]){
                 if(!this.boardCollision("down")){
                     this.activeBlock.res.y += blockSize;
                 }else{
@@ -58,6 +59,7 @@ export class Board {
         })
 
         this.boardTicker.start();
+        this.paused = false;
     }
 
     createBoard(){
@@ -69,58 +71,73 @@ export class Board {
 
         let next = new Graphics();
         next.beginFill(0x242424)
-        next.drawRect(this.bSprite.getBounds().left - 6 * blockSize, this.bSprite.getBounds().top, 6 * blockSize, 6 * blockSize)
+        next.drawRoundedRect(this.bSprite.getBounds().left - 6 * blockSize - 1/3 * blockSize, this.bSprite.getBounds().top, 6 * blockSize, 6 * blockSize, blockSize / 3)
         next.endFill();
         app.stage.addChild(next)
 
+        let stats = new Graphics();
+        stats.beginFill(0x242424)
+        stats.drawRoundedRect(this.bSprite.getBounds().right + 1/3 * blockSize, this.bSprite.getBounds().top, 10 * blockSize, 11/2 * blockSize, blockSize / 3)
+        stats.endFill();
+        app.stage.addChild(stats)
+
+        let midx = stats.getBounds().x + stats.getBounds().width / 2;
+
         let lvlLabel = new Text('Level',{
             fontFamily: 'Lucida Console',
-            fontSize: blockSize,
-            align: 'left'
+            fontSize: blockSize / 2,
+            fill: [0xFFFFFF, 0xA0A0A0]
         })
-
-        lvlLabel.position.set(this.bSprite.getBounds().right, this.bSprite.getBounds().top);
+        lvlLabel.anchor.set(0.5, 0)
+        lvlLabel.position.set(midx, this.bSprite.getBounds().top + blockSize / 3);
         app.stage.addChild(lvlLabel);
 
         let lvl = new Text('1',{
             fontFamily: 'Lucida Console',
             fontSize: blockSize,
+            fill: [0xFFFFFF, 0xA0A0A0]
         })
-        lvl.position.set(this.bSprite.getBounds().right, this.bSprite.getBounds().top + blockSize * 3/2);
+        lvl.anchor.set(0.5, 0)
+        lvl.position.set(midx, lvlLabel.getBounds().bottom);
         app.stage.addChild(lvl);
         this.textNodes[0] = lvl;
 
         let linesLabel = new Text('Lines cleared',{
             fontFamily: 'Lucida Console',
-            fontSize: blockSize,
-            align: 'left'
+            fontSize: blockSize / 2,
+            fill: [0xFFFFFF, 0xA0A0A0]
         })
-
-        linesLabel.position.set(this.bSprite.getBounds().right, this.bSprite.getBounds().top + 3 * blockSize)
+        linesLabel.anchor.set(0.5, 0)
+        linesLabel.position.set(midx, lvl.getBounds().bottom + blockSize / 3)
         app.stage.addChild(linesLabel)
 
         let lines = new Text('0',{
             fontFamily: 'Lucida Console',
             fontSize: blockSize,
+            fill: [0xFFFFFF, 0xA0A0A0]
         })
         this.textNodes[1] = lines;
-        lines.position.set(this.bSprite.getBounds().right, this.bSprite.getBounds().top + blockSize * 9/2);
+        lines.anchor.set(0.5, 0)
+        lines.position.set(midx, linesLabel.getBounds().bottom);
         app.stage.addChild(lines);
 
         let scoreLabel  = new Text('Score',{
             fontFamily: 'Lucida Console',
-            fontSize: blockSize,
-            align: 'left'
+            fontSize: blockSize / 2,
+            fill: [0xFFFFFF, 0xA0A0A0]
         })
-        scoreLabel.position.set(this.bSprite.getBounds().right, this.bSprite.getBounds().top + 6 * blockSize);
+        scoreLabel.anchor.set(0.5, 0);
+        scoreLabel.position.set(midx, lines.getBounds().bottom + blockSize / 3);
         app.stage.addChild(scoreLabel)
 
         let score = new Text('0',{
             fontFamily: 'Lucida Console',
             fontSize: blockSize,
+            fill: [0xFFFFFF, 0xA0A0A0]
         })
         this.textNodes[2] = score;
-        score.position.set(this.bSprite.getBounds().right, this.bSprite.getBounds().top + blockSize * 15/2);
+        score.anchor.set(0.5, 0);
+        score.position.set(midx, scoreLabel.getBounds().bottom);
         app.stage.addChild(score);
     }
 
@@ -145,19 +162,23 @@ export class Board {
     pause(){
         if(this.boardTicker.started){
             this.boardTicker.stop()
+            pause();
+            this.playing = false;
         }else{
-            this.boardTicker.start()
+            this.boardTicker.start();
+            unpause();
+            this.playing = true;
         }
     }
 
     end(){
         this.boardTicker.stop();
         this.playing = false;
-        start();
+        endScreen();
     }
 
     levelCheck(){
-        if(this.linesDestroyed > 0 && this.level < this.spdLevels.length && this.startingLevel + Math.floor(this.linesDestroyed / 10) != this.level){
+        if(this.linesDestroyed > 0 && this.level <= this.spdLevels.length && this.startingLevel + Math.floor(this.linesDestroyed / 10) != this.level){
             this.level = this.startingLevel + Math.floor(this.linesDestroyed / 10);
         }
     }
@@ -246,6 +267,15 @@ export class Board {
         this.nextBlock.res.x = this.bSprite.getBounds().left - (6 * blockSize + this.nextBlock.res.width) / 2;
     }
 
+    hardDrop(){
+        let blocks = 0;
+        while(!this.boardCollision("down")){
+            this.activeBlock.res.y += blockSize;
+            blocks++;
+        }
+        this.addScore(0, blocks);
+    }    
+
     boardCollision(direction: string){
         switch (direction) {
             case "down": {
@@ -320,7 +350,7 @@ export class Board {
                 case "ArrowDown": {
                     if(!this.boardCollision("down")){
                         this.activeBlock.res.y += blockSize;
-                        this.addScore(0, true);
+                        this.addScore(0, 1);
                     }
                     break;
                 }
@@ -336,6 +366,14 @@ export class Board {
                     }
                     break;
                 }
+                case " ": {
+                    this.hardDrop();
+                    break;
+                }
+                case "Escape": {
+                    this.pause();
+                    break;
+                }
             }
         }
     }
@@ -346,11 +384,15 @@ export class Board {
         this.textNodes[2].text = (this.score).toString();
     }
 
-    addScore(ld: number, soft?: boolean){ //ld - lines destroyed, soft - for drops soft/hard
+    addScore(ld: number, linesDropped?: number){ //ld - lines destroyed, soft - for drops soft/hard
         switch (ld) {
             case 0:
-                if(soft){
-                    this.score += this.level;
+                if(linesDropped == 1){
+                    this.score += this.level;   
+                }else{
+                    if(linesDropped){
+                        this.score += linesDropped * this.level * 2;
+                    }
                 }
                 break;
             case 1:
