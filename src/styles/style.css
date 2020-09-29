@@ -2,10 +2,22 @@
     padding: 0;
     margin: 0;
     overflow: hidden;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none; 
+    -khtml-user-select: none;
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none;    
 }
 
 body {
     background-color: black;
+}
+
+iframe {
+    position: absolute;
+    height: 100vh;
+    width: 100vw;
 }
 
 #loading {
@@ -51,6 +63,7 @@ body {
     width: 8vw;
     display: none;
     cursor: pointer;
+    outline: none;
 }
 
 #options {
@@ -64,19 +77,10 @@ body {
     justify-content: center;
     align-items: center;
     color: black;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none; 
-    -khtml-user-select: none;
-    -moz-user-select: none; 
-    -ms-user-select: none; 
-    user-select: none;    
-    -webkit-touch-callout: none;
-    -webkit-user-select: none; 
-    -khtml-user-select: none;
-    -moz-user-select: none; 
-    -ms-user-select: none; 
-    user-select: none;
     font-family: "Lucida Console", Courier, monospace;
+    grid-template-columns: 40% 20% 40%;
+    grid-template-areas: 
+    ". center right";
 }
 
 #options-inner{
@@ -89,6 +93,7 @@ body {
     border-style: solid;
     border-width: 2px;
     padding: 1vw;
+    grid-area: center;
 }
 
 #lvl{
@@ -115,7 +120,7 @@ body {
     font-size: 5vh;
 }
 
-#play {
+.confirm {
     background:    #4c5654;
     background:    linear-gradient(#4c5654, #393333);
     border-radius: 1vw;
@@ -130,4 +135,107 @@ body {
     justify-content: center;
     align-items: center;
     margin-top: 2vh;
+    cursor: pointer;
+}
+
+#pause, #end{
+    display: flex;
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-family: "Lucida Console", Courier, monospace;
+}
+
+.inner{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 1vw;
+    border-style: solid;
+    border-width: 2px;
+    padding: 1vw 8vw 1vw 8vw;
+}
+
+.inner > p {
+    padding: 1vw;
+    font-size: 1.8vw
+}
+.inner > p:first-child {
+    font-size: 3vw;
+}
+
+.inner > p:not(:first-child){
+    cursor: pointer;
+}
+
+
+.inner > p:not(:first-child):hover {
+    text-decoration: underline;
+}
+
+.flexCol {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    line-height: 200%;
+}
+
+.flexCol > .confirm {
+    width: auto;
+    padding-left: 1vw;
+    padding-right: 1vw;
+}
+
+#name {
+    background: rgba(0, 0, 0, 0);
+    text-align: center;
+    border-radius: 1vw;
+    outline: none;
+    font-family: "Lucida Console", Courier, monospace;
+    font-weight: bold;
+}
+
+#highscores {
+    display: grid;
+    grid-template-rows: 5% 95%;
+    justify-self: center;
+    height: 90vh;
+    width: 90%;
+    grid-area: right;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 1vw;
+    text-align: center;
+    padding: 0.5vw;
+}
+
+#head {
+    display: grid;
+    grid-template-columns: 10% 30% 15% 15% auto;
+    font-weight: bold;
+}
+
+#body {
+    display: grid;
+    grid-template-rows: 10% 10% 10% 10% 10% 10% 10% 10% 10% 10%;
+
+}
+
+#body > div {
+    display: grid;
+    grid-template-columns: 10% 30% 15% 15% auto;
+}
+
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
