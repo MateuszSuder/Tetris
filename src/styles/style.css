@@ -211,7 +211,7 @@ iframe {
     height: 90vh;
     width: 90%;
     grid-area: right;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.8);
     border-radius: 1vw;
     text-align: center;
     padding: 0.5vw;
@@ -238,4 +238,9 @@ iframe {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+#body > div:nth-child(even){
+    border-radius: 1vw;
+    background: rgba(90, 87, 248, 0.2);
 }
